@@ -54,111 +54,103 @@ TEMPERATURE = 0
 # 전체 이미지가 잘리지 않도록 비율 유지
 # =========================================================
 
-OTTER_SVG = """
+OTTER_SVG = '''
 <svg xmlns="http://www.w3.org/2000/svg"
 viewBox="0 0 380 440" width="380" height="440">
 
 <defs>
  <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
-  <stop stop-color="#c28a61"/>
-  <stop offset="1" stop-color="#90603e"/>
+  <stop stop-color="#D49B71"/>
+  <stop offset="1" stop-color="#9B6546"/>
  </linearGradient>
 
- <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
-  <stop stop-color="#ecfbff"/>
-  <stop offset="1" stop-color="#d9f0ff"/>
+ <linearGradient id="chest" x1="0" y1="0" x2="0" y2="1">
+  <stop stop-color="#FFF1DC"/>
+  <stop offset="1" stop-color="#F4D7B9"/>
+ </linearGradient>
+
+ <linearGradient id="light" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#F7DBBB"/>
+  <stop offset="1" stop-color="#FCECD7"/>
  </linearGradient>
 </defs>
 
-<rect x="7" y="7" width="366" height="426" rx="34"
-fill="url(#blue)" stroke="#c1e5f4" stroke-width="3"/>
-
-<circle cx="60" cy="67" r="11" fill="#ffffff" opacity=".8"/>
-<circle cx="320" cy="346" r="18" fill="#ffffff" opacity=".5"/>
-
 <!-- 꼬리 -->
-<path d="M123 300 Q63 335 82 388 Q113 420 146 371"
-fill="#895638"/>
-
-<!-- 몸 -->
-<ellipse cx="191" cy="288" rx="97" ry="111" fill="url(#fur)"/>
-<ellipse cx="191" cy="303" rx="66" ry="85" fill="#ffe6cc"/>
+<path d="M124 312 C69 301 51 353 77 375
+C98 395 126 379 141 348"
+fill="#9D6948"/>
 
 <!-- 발 -->
-<ellipse cx="144" cy="388" rx="35" ry="20" fill="#805031"/>
-<ellipse cx="238" cy="388" rx="35" ry="20" fill="#805031"/>
+<ellipse cx="135" cy="400" rx="42" ry="21" fill="#895438"/>
+<ellipse cx="244" cy="400" rx="42" ry="21" fill="#895438"/>
 
-<!-- 팔 -->
-<ellipse cx="104" cy="282" rx="24" ry="61"
-fill="#a76c48" transform="rotate(16 104 282)"/>
+<!-- 몸 -->
+<ellipse cx="190" cy="300" rx="99" ry="111" fill="url(#fur)"/>
+<ellipse cx="190" cy="312" rx="69" ry="86" fill="url(#chest)"/>
 
-<ellipse cx="284" cy="283" rx="25" ry="58"
-fill="#a76c48" transform="rotate(-16 284 283)"/>
+<!-- 두 손을 옆에 둔 포즈 -->
+<ellipse cx="105" cy="300" rx="27" ry="67"
+fill="#AC7653" transform="rotate(13 105 300)"/>
 
-<!-- 메모지 -->
-<rect x="260" y="260" width="69" height="92"
-rx="11" fill="white" stroke="#80c9e2" stroke-width="4"/>
+<ellipse cx="274" cy="300" rx="27" ry="67"
+fill="#AC7653" transform="rotate(-13 274 300)"/>
 
-<rect x="282" y="252" width="26" height="14"
-rx="5" fill="#8dd7eb"/>
-
-<path d="M274 286h41 M274 303h41 M274 320h32"
-stroke="#9fc7d5" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="93" cy="353" rx="22" ry="20" fill="#9B6546"/>
+<ellipse cx="287" cy="353" rx="22" ry="20" fill="#9B6546"/>
 
 <!-- 귀 -->
-<circle cx="135" cy="120" r="26" fill="#a56d48"/>
-<circle cx="247" cy="120" r="26" fill="#a56d48"/>
+<circle cx="119" cy="119" r="29" fill="#A56E4D"/>
+<circle cx="261" cy="119" r="29" fill="#A56E4D"/>
 
-<circle cx="135" cy="120" r="13" fill="#e4bca0"/>
-<circle cx="247" cy="120" r="13" fill="#e4bca0"/>
+<circle cx="119" cy="119" r="16" fill="#F1C4A7"/>
+<circle cx="261" cy="119" r="16" fill="#F1C4A7"/>
 
-<!-- 머리 -->
-<ellipse cx="191" cy="179" rx="103" ry="104" fill="url(#fur)"/>
-<ellipse cx="191" cy="201" rx="72" ry="58" fill="#ffe4cc"/>
+<!-- 큰 머리 -->
+<ellipse cx="190" cy="184" rx="112" ry="111"
+fill="url(#fur)"/>
+
+<!-- 입 주변 -->
+<ellipse cx="190" cy="219" rx="79" ry="61"
+fill="url(#light)"/>
 
 <!-- 눈 -->
-<circle cx="157" cy="170" r="10" fill="#2c251f"/>
-<circle cx="225" cy="170" r="10" fill="#2c251f"/>
+<ellipse cx="151" cy="183" rx="11" ry="13" fill="#30241F"/>
+<ellipse cx="229" cy="183" rx="11" ry="13" fill="#30241F"/>
 
-<circle cx="154" cy="167" r="3" fill="white"/>
-<circle cx="222" cy="167" r="3" fill="white"/>
+<circle cx="147" cy="178" r="3.5" fill="white"/>
+<circle cx="225" cy="178" r="3.5" fill="white"/>
+
+<!-- 볼터치 -->
+<ellipse cx="127" cy="211" rx="17" ry="10"
+fill="#F6A9A2" opacity="0.68"/>
+
+<ellipse cx="253" cy="211" rx="17" ry="10"
+fill="#F6A9A2" opacity="0.68"/>
 
 <!-- 코 -->
-<ellipse cx="191" cy="192" rx="12" ry="9" fill="#4e382d"/>
+<path d="M178 215 Q190 207 202 215
+Q203 228 190 232 Q177 228 178 215"
+fill="#50372D"/>
 
-<!-- 입 -->
-<path d="M172 212 Q191 232 210 212"
-fill="none" stroke="#4e382d"
+<!-- 미소 -->
+<path d="M190 232 L190 240
+M190 239 Q174 256 161 240
+M190 239 Q206 256 219 240"
+fill="none" stroke="#50372D"
 stroke-width="5" stroke-linecap="round"/>
 
-<!-- 볼 -->
-<ellipse cx="133" cy="195" rx="13" ry="8"
-fill="#f2ada6" opacity=".65"/>
-
-<ellipse cx="249" cy="195" rx="13" ry="8"
-fill="#f2ada6" opacity=".65"/>
-
-<!-- 명찰 -->
-<rect x="153" y="260" width="76" height="31"
-rx="16" fill="#87d8ef"/>
-
-<text x="191" y="281" text-anchor="middle"
-font-family="Arial,sans-serif" font-size="16"
-font-weight="bold" fill="#265269">SUI</text>
-
-<!-- 말풍선 -->
-<rect x="242" y="47" width="110" height="47"
-rx="16" fill="white" stroke="#bee1f0" stroke-width="2"/>
-
-<path d="M258 94l-14 14 4-17"
-fill="white" stroke="#bee1f0" stroke-width="2"/>
-
-<text x="297" y="76" text-anchor="middle"
-font-family="sans-serif" font-size="16"
-font-weight="bold" fill="#3d6175">안녕하세요!</text>
+<!-- 수염 -->
+<path d="M111 228 L145 232
+M109 242 L144 241
+M235 232 L269 228
+M236 241 L271 242"
+stroke="#9B6A55"
+stroke-width="2.2"
+stroke-linecap="round"
+opacity="0.68"/>
 
 </svg>
-"""
+'''
 
 OTTER_DATA = (
     "data:image/svg+xml;base64,"
@@ -731,7 +723,76 @@ st.markdown(
         }
     }
 
-    </style>
+    
+/* 스이 UI: 캐릭터 단독 표시 및 가독성 개선 */
+
+.block-container {
+    max-width: 1320px !important;
+    padding-top: 4.2rem !important;
+    padding-bottom: 3rem !important;
+}
+
+.main-heading {
+    font-size: clamp(1.65rem, 2.5vw, 2.35rem) !important;
+    line-height: 1.45 !important;
+    margin-bottom: 1.4rem !important;
+}
+
+.otter-card {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0.5rem 0 !important;
+    min-height: 500px !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.otter-card img {
+    width: min(100%, 305px) !important;
+    max-width: 305px !important;
+    max-height: 440px !important;
+    height: auto !important;
+    object-fit: contain !important;
+}
+
+.otter-label {
+    font-size: 1rem !important;
+    margin-top: 0 !important;
+}
+
+[data-testid="stChatMessage"] {
+    padding: 0.8rem 0.95rem !important;
+    border-radius: 13px !important;
+}
+
+[data-testid="stChatMessage"] p {
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+[data-testid="stForm"] {
+    border-radius: 14px;
+}
+
+@media (max-width: 950px) {
+    .block-container {
+        padding-top: 3.5rem !important;
+    }
+
+    .otter-card {
+        min-height: 240px !important;
+    }
+
+    .otter-card img {
+        max-height: 235px !important;
+        width: 180px !important;
+    }
+}
+
+</style>
     """,
     unsafe_allow_html=True
 )
