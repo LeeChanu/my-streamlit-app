@@ -6,6 +6,7 @@ import base64
 import hashlib
 import smtplib
 import tempfile
+import random
 from pathlib import Path
 from email.message import EmailMessage
 from typing import Literal
@@ -14,13 +15,13 @@ import streamlit as st
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-
+from html_report import create_html_email
 # =========================================================
 # 1. 기본 설정
 # =========================================================
 
 st.set_page_config(
-    page_title="스이 | 이찬우의 개인비서",
+    page_title="스이 | 김대리의 개인비서",
     page_icon="🦦",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -75,7 +76,7 @@ Path(OTTER_AVATAR).write_bytes(
 # =========================================================
 
 SYSTEM_PROMPT = """
-너는 '이찬우'의 업무를 돕는 전문 AI 개인비서 '스이'이다.
+너는 '김대리'의 업무를 돕는 전문 AI 개인비서 '스이'이다.
 
 회의록 분석, 담당 업무 확인, 결정사항 정리,
 후속 질의응답, 이메일 초안과 발송 준비를 맡는다.
@@ -88,7 +89,7 @@ SYSTEM_PROMPT = """
 
 2. 담당자, 마감일, 수치, 이메일 주소를 만들어내지 않는다.
 
-3. 이찬우 또는 김 대리에게 배정된 업무가
+3. 김 대리에게 배정된 업무가
    동일인이라는 근거가 없다면 함부로 합치지 않는다.
    회의록에서 김 대리가 사용자 자신이라는 명시적
    정보가 있거나 사용자 설정이 그와 같을 때만 연결한다.
@@ -131,7 +132,7 @@ SYSTEM_PROMPT = """
 - 핵심 논의
 - 최종 결정사항
 - 담당자별 업무
-- 이찬우 담당 업무
+- 김대리 담당 업무
 - 명시된 마감일
 - 업무 근거
 - 미확정 사항
@@ -288,7 +289,6 @@ def speech_to_text(audio_file):
 # ---------------------------------------------------------
 
 
-
 def text_to_speech(text):
     response = client.audio.speech.create(
         model="gpt-4o-mini-tts",
@@ -305,7 +305,6 @@ def text_to_speech(text):
         )
     )
     return response.content
-
 
 
 
@@ -1025,7 +1024,7 @@ with st.sidebar:
 
 st.markdown(
     '<div class="main-heading">'
-    '🦦 스이 | 이찬우의 개인비서'
+    '🦦 스이 | 김대리의 개인비서'
     '</div>',
     unsafe_allow_html=True
 )
@@ -1142,7 +1141,7 @@ with right:
             ):
 
                 st.markdown(
-                    "안녕하세요! 🦦 저는 스이에요. "
+                    "안녕하세요! 🦦 저는 스이이에요. "
                     "회의록을 올리고 필요한 업무를 물어보세요. "
                     "아래에서 바로 대화할 수 있어요!"
                 )
@@ -1172,7 +1171,7 @@ with right:
 
         chat_prompt = st.text_area(
             "스이에게 메시지 보내기",
-            placeholder="이찬우님, 어떤 업무를 도와드릴까요?",
+            placeholder="김대리님, 어떤 업무를 도와드릴까요?",
             height=95
         )
 
