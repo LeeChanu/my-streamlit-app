@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 # =========================================================
 
 st.set_page_config(
-    page_title="에이블 | 이찬우의 개인비서",
+    page_title="스이 | 이찬우의 개인비서",
     page_icon="🦦",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -144,7 +144,7 @@ rx="16" fill="#87d8ef"/>
 
 <text x="191" y="281" text-anchor="middle"
 font-family="Arial,sans-serif" font-size="16"
-font-weight="bold" fill="#265269">AIBLE</text>
+font-weight="bold" fill="#265269">SUI</text>
 
 <!-- 말풍선 -->
 <rect x="242" y="47" width="110" height="47"
@@ -181,7 +181,7 @@ Path(OTTER_AVATAR).write_text(
 # =========================================================
 
 SYSTEM_PROMPT = """
-너는 '이찬우'의 업무를 돕는 전문 AI 개인비서 '에이블'이다.
+너는 '이찬우'의 업무를 돕는 전문 AI 개인비서 '스이'이다.
 
 회의록 분석, 담당 업무 확인, 결정사항 정리,
 후속 질의응답, 이메일 초안과 발송 준비를 맡는다.
@@ -355,7 +355,7 @@ def reset_chat():
 # =========================================================
 
 STT_HINT = (
-    "한국어 업무 대화. 용어: 에이블, 이찬우, 김 대리, "
+    "한국어 업무 대화. 용어: 스이, 이찬우, 김 대리, "
     "KT AIVLE School, 회의록, 담당 업무, 마감일, "
     "KPI, 회의 요약, 데이터 분석, 이메일 발송."
 )
@@ -465,7 +465,7 @@ def process_question(question, enable_tts):
     if not question:
         return
 
-    with st.spinner("에이블이 답변을 작성하고 있어요..."):
+    with st.spinner("스이이 답변을 작성하고 있어요..."):
         result = analyze(question)
 
     answer = result.answer
@@ -522,7 +522,7 @@ def process_question(question, enable_tts):
                 else (result.voice_answer or answer)
             )
 
-            with st.spinner("에이블의 음성을 만들고 있어요..."):
+            with st.spinner("스이의 음성을 만들고 있어요..."):
                 st.session_state.last_audio = text_to_speech(
                     speech_text
                 )
@@ -668,14 +668,14 @@ st.markdown(
 
     .block-container {
         max-width: 1550px;
-        padding-top: 1.5rem;
+        padding-top: 4.5rem !important;
         padding-bottom: 2.5rem;
     }
 
     .main-heading {
-        font-size: clamp(1.55rem, 2.6vw, 2.2rem);
+        font-size: clamp(1.5rem, 2.5vw, 2.1rem);
         font-weight: 800;
-        line-height: 1.5;
+        line-height: 1.6;
         margin: 0 0 1rem 0;
         color: var(--text-color);
         word-break: keep-all;
@@ -743,7 +743,7 @@ st.markdown(
 
 with st.sidebar:
 
-    st.title("🦦 에이블 설정")
+    st.title("🦦 스이 설정")
     st.subheader("📌 상태")
 
     # 회의록 상태
@@ -888,7 +888,7 @@ with st.sidebar:
             (
                 "사용자: "
                 if m["role"] == "user"
-                else "에이블: "
+                else "스이: "
             ) + m["content"]
             for m in st.session_state.messages
         )
@@ -906,12 +906,7 @@ with st.sidebar:
 # 수달 캐릭터 + 실제 채팅창
 # =========================================================
 
-st.markdown(
-    '<div class="main-heading">'
-    '🦦 에이블 | 이찬우의 개인비서'
-    '</div>',
-    unsafe_allow_html=True
-)
+st.title("🦦 스이 | 이찬우의 개인비서")
 
 left, right = st.columns(
     [1.05, 2.45],
@@ -930,10 +925,10 @@ with left:
         <div class="otter-card">
             <img
                 src="{OTTER_DATA}"
-                alt="에이블 수달 캐릭터 전체 모습"
+                alt="스이 수달 캐릭터 전체 모습"
             >
             <div class="otter-label">
-                에이블 · AI 업무 파트너
+                스이 · AI 업무 파트너
             </div>
         </div>
         """,
@@ -947,7 +942,7 @@ with left:
 
 with right:
 
-    st.markdown("### 💬 에이블과 실시간 대화")
+    st.markdown("### 💬 스이과 실시간 대화")
 
     # 큰 대화 영역
     with st.container(
@@ -963,7 +958,7 @@ with right:
             ):
 
                 st.markdown(
-                    "안녕하세요! 🦦 저는 에이블이에요. "
+                    "안녕하세요! 🦦 저는 스이이에요. "
                     "회의록을 올리고 필요한 업무를 물어보세요. "
                     "아래에서 바로 대화할 수 있어요!"
                 )
@@ -992,13 +987,13 @@ with right:
     ):
 
         chat_prompt = st.text_area(
-            "에이블에게 메시지 보내기",
+            "스이에게 메시지 보내기",
             placeholder="이찬우님, 어떤 업무를 도와드릴까요?",
             height=95
         )
 
         send_prompt = st.form_submit_button(
-            "💬 에이블에게 보내기",
+            "💬 스이에게 보내기",
             type="primary",
             use_container_width=True
         )
@@ -1128,7 +1123,7 @@ with right:
 
     if st.session_state.last_audio is not None:
 
-        st.caption("🔊 에이블의 음성 답변")
+        st.caption("🔊 스이의 음성 답변")
 
         st.audio(
             st.session_state.last_audio,
@@ -1358,6 +1353,6 @@ if st.session_state.analysis:
         )
 
 st.caption(
-    "에이블 · 회의록 분석 / STT / TTS / "
+    "스이 · 회의록 분석 / STT / TTS / "
     "Tool Calling / 최근 10개 대화"
 )
