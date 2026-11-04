@@ -1030,8 +1030,70 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
+st.markdown('''
+<style>
+
+/* 수달 영역을 채팅창 높이에 맞춤 */
+.otter-card {
+    height: 480px !important;
+    min-height: 480px !important;
+    max-height: 480px !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+
+    padding: 0 0 10px !important;
+    overflow: visible !important;
+}
+
+/* 수달 캐릭터 확대 */
+.otter-card img {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 390px !important;
+    max-height: 420px !important;
+    height: auto !important;
+
+    object-fit: contain !important;
+    margin: 0 auto !important;
+}
+
+/* 캐릭터 이름 */
+.otter-label {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    margin-top: 4px !important;
+}
+
+/* 모바일 화면 */
+@media (max-width: 850px) {
+    .otter-card {
+        height: auto !important;
+        min-height: 220px !important;
+        max-height: none !important;
+        justify-content: center !important;
+    }
+
+    .otter-card img {
+        width: 220px !important;
+        max-height: 260px !important;
+    }
+}
+
+</style>
+''', unsafe_allow_html=True)
+
 left, right = st.columns(
-    [1.05, 2.45],
+    [1.3, 2.7],
     gap="large"
 )
 
