@@ -287,43 +287,24 @@ def speech_to_text(audio_file):
 # 2. 귀여운 스이 목소리 설정
 # ---------------------------------------------------------
 
+
 def text_to_speech(text):
-
-    result = client.audio.speech.create(
+    response = client.audio.speech.create(
         model="gpt-4o-mini-tts",
-        voice="coral",
-        input=text[:4000],
+        voice="shimmer",
+        input=text[:3500],
         response_format="mp3",
-        speed=1.05,
-        instructions="""
-        한국어로 자연스럽게 말하세요.
-
-        당신은 귀엽고 사랑스러운 아기 수달 AI 비서
-        '스이'의 목소리입니다.
-
-        [목소리 스타일]
-        - 밝고 맑으며 사랑스러운 목소리
-        - 약간 높은 음역대의 부드러운 톤
-        - 귀여운 애니메이션 캐릭터처럼 생동감 있는 억양
-        - 듣는 사람이 기분 좋아지는 따뜻한 목소리
-        - 살짝 장난스럽지만 지나치게 과장하지 않는 느낌
-
-        [말하기 방식]
-        - 문장 끝은 부드럽게 마무리하세요.
-        - 기쁜 내용은 살짝 들뜬 목소리로 말하세요.
-        - 친절하고 상냥하게 이야기하세요.
-        - 너무 빠르게 말하지 마세요.
-        - 억양은 단조롭지 않게 자연스럽게 표현하세요.
-
-        [전문 비서 규칙]
-        - 업무 내용은 정확하고 또렷하게 전달하세요.
-        - 중요한 날짜와 숫자는 분명하게 발음하세요.
-        - 마감일과 결정사항은 차분하게 전달하세요.
-        - 업무 내용을 장난스럽게 왜곡하지 마세요.
-        """
+        instructions=(
+            "한국어로 말해 주세요. "
+            "밝고 귀여운 수달 비서 스이입니다. "
+            "맑고 상냥한 느낌으로 약간 발랄하게 말하되, "
+            "애교를 지나치게 과장하지 마세요. "
+            "중요한 날짜와 숫자는 또렷하게 발음하세요. "
+            "낭독체보다는 자연스러운 대화체로 말하세요."
+        )
     )
+    return response.content
 
-    return result.content
 
 
 # ---------------------------------------------------------
@@ -816,12 +797,92 @@ st.markdown(
 
 
 # =========================================================
+
+# 스이 레이아웃: 수달 이미지와 채팅창 높이 일치
+
+st.markdown("""
+<style>
+.block-container {
+    max-width: 1320px !important;
+    padding-top: 4rem !important;
+}
+
+.otter-card {
+    min-height: 0 !important;
+    height: auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+}
+
+.otter-card img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 270px !important;
+    max-height: 350px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+}
+
+.otter-label {
+    text-align: center !important;
+    margin-top: 0.6rem !important;
+}
+
+[data-testid="stChatMessage"] p {
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+@media (max-width: 850px) {
+    .block-container {
+        padding-top: 3rem !important;
+    }
+
+    .otter-card img {
+        max-width: 180px !important;
+        max-height: 220px !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # 8. 사이드바 - 상태 통합
 # =========================================================
 
 with st.sidebar:
 
     st.title("🦦 스이 설정")
+
+    if st.button("🔊 새 스이 목소리 테스트", use_container_width=True):
+        try:
+            with st.spinner("새 음성 생성 중..."):
+                sample = text_to_speech(
+                    "안녕하세요! 저는 스이예요. "
+                    "오늘도 신나게 업무를 도와드릴게요!"
+                )
+
+            st.audio(
+                sample,
+                format="audio/mp3",
+                autoplay=True
+            )
+
+            st.success(
+                "새 음성 생성: gpt-4o-mini-tts / shimmer"
+            )
+
+        except Exception as e:
+            st.error(
+                f"TTS 오류: {type(e).__name__}: {e}"
+            )
+
     st.subheader("📌 상태")
 
     # 회의록 상태
