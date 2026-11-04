@@ -620,6 +620,10 @@ def send_email(to, subject, body):
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(body)
+    msg.add_alternative(
+        create_html_email(subject, body),
+        subtype="html"
+    )
 
     try:
         with smtplib.SMTP_SSL(
