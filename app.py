@@ -75,66 +75,7 @@ st.markdown("""
         line-height: 1.3;
     }
 
-    /* 입력바 컨테이너 포지셔닝 조정 */
-    div[data-testid="stChatInput"] {
-        position: relative !important;
-    }
-
-    /* 질문 입력창 텍스트박스 자체를 지목하여 왼쪽에 클립이 들어갈 넉넉한 영역 확보 */
-    div[data-testid="stChatInput"] textarea {
-        padding-left: 55px !important;
-    }
-
-    /* 실제 파일 업로더 컨테이너를 입력창 박스 내부 좌측 정중앙에 완벽하게 일체화 */
-    .clip-uploader-container {
-        position: absolute !important;
-        left: 10px !important;
-        bottom: 8px !important;
-        z-index: 99999 !important;
-        width: 36px !important;
-        height: 36px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    .clip-uploader-container div[data-testid="stFileUploader"] {
-        width: 100% !important;
-        height: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .clip-uploader-container div[data-testid="stFileUploader"] section {
-        padding: 0 !important;
-        min-height: auto !important;
-        background-color: transparent !important;
-        border: none !important;
-    }
-
-    /* 불필요한 기본 드롭박스 텍스트 가리기 */
-    .clip-uploader-container div[data-testid="stFileUploader"] section div {
-        display: none !important;
-    }
-    
-    /* 업로드 브라우즈 버튼을 입력창 바 내부에 어울리는 둥근 회색 📎 모양으로 완전 리셋 */
-    .clip-uploader-container div[data-testid="stFileUploader"] button {
-        background-color: transparent !important;
-        border: none !important;
-        width: 36px !important;
-        height: 36px !important;
-        color: #6B7280 !important;
-        font-size: 1.4rem !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        cursor: pointer !important;
-        box-shadow: none !important;
-        transition: color 0.2s;
-    }
-    
-    .clip-uploader-container div[data-testid="stFileUploader"] button:hover {
-        color: #1E3A8A !important;
-    }
+    /* 첨부 아이콘은 st.chat_input의 기본 업로드 버튼을 사용합니다. */
 </style>
 """, unsafe_allow_html=True)
 
@@ -297,17 +238,23 @@ for message in st.session_state.messages:
     with st.chat_message(role):
         st.markdown(message.content)
 
-# --- 7. 메인 채팅 입력창 구역 및 📎 일체형 클립 컨테이너 배치 ---
-# 절대 위치 레이아웃으로 st.chat_input 안으로 완벽히 병합
-st.markdown('<div class="clip-uploader-container">', unsafe_allow_html=True)
-uploaded_file = st.file_uploader("📎", type=["pdf"], label_visibility="collapsed")
-st.markdown('</div>', unsafe_allow_html=True)
-
-if uploaded_file is not None:
-    process_uploaded_file(uploaded_file)
-
-# 사용자 입력 감지
-user_input = st.chat_input("질문할 내용을 입력해 주세요.")
+# --- 7. 입력바 안쪽 왼쪽의 기본 첨부 아이콘 ---
+chat_submission = st.chat_input(
+    "질문할 내용을 입력해 주세요.",
+    accept_file=True,
+    file_type=["pdf"],
+    key="aivle_chat_input",
+)
+user_input = ""
+if chat_submission is not None:
+    user_input = chat_submission.text
+    for uploaded_file in chat_submission.files:
+        try:
+            with st.spinner("첨부한 PDF를 반영하고 있습니다..."):
+                process_uploaded_file(uploaded_file)
+        except Exception as e:
+            st.error(f"PDF 처리에 실패했습니다: {e}")
+            st.stop()
 
 if st.session_state.user_query:
     user_input = st.session_state.user_query
