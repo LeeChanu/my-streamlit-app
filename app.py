@@ -19,12 +19,12 @@ st.set_page_config(page_title="AIVLE School 학습 도우미", page_icon="💬",
 CHROMA_DIR = "chroma_db"
 COLLECTION = "aivle_docs"
 
-# GPT 느낌의 모던하고 심플한 CSS 스타일링 + 떠다니는 포춘쿠키 애니메이션
+# GPT 느낌의 모던하고 심플한 CSS 스타일링 + 떠다니는 포춘쿠키 애니메이션 + 세로 타임라인 카드
 st.markdown("""
 <style>
     /* 대화창 상단 여백 제거 및 너비 제한 */
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1.5rem;
         padding-bottom: 2rem;
         max-width: 850px;
     }
@@ -56,6 +56,25 @@ st.markdown("""
     }
     .floating-cookie:hover {
         filter: drop-shadow(0px 8px 12px rgba(245, 158, 11, 0.4));
+    }
+    /* 세로형 커리큘럼 타임라인 블록 */
+    .timeline-card {
+        background-color: #F9FAFB;
+        border-left: 4px solid #1E3A8A;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+        border-radius: 0 8px 8px 0;
+    }
+    .timeline-title {
+        font-weight: bold;
+        color: #1E3A8A;
+        font-size: 0.85rem;
+        margin-bottom: 3px;
+    }
+    .timeline-desc {
+        font-size: 0.8rem;
+        color: #4B5563;
+        line-height: 1.3;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -131,9 +150,9 @@ if "messages" not in st.session_state:
 if "user_query" not in st.session_state:
     st.session_state.user_query = ""
 
-# --- 4. 사이드바 구성 (기타 기능은 모두 사이드바 내부로 숨김) ---
+# --- 4. 사이드바 구성 ---
 with st.sidebar:
-    # 기존 웹 주소 대신 업로드해주신 투명 배경 AIVLE 로고 파일 불러오기
+    # 투명 배경 로고 적용
     logo_path = "투명 배경 AIVLE 로고 복원.png"
     if os.path.exists(logo_path):
         try:
@@ -171,22 +190,25 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # 파일 업로드
-    st.subheader("📂 나만의 문서 추가")
-    uploaded_file = st.file_uploader("추가할 PDF 백서를 업로드하세요.", type=["pdf"])
-    if uploaded_file is not None:
-        if st.button("학습 데이터에 동기화", use_container_width=True):
-            process_uploaded_file(uploaded_file)
-
-    st.markdown("---")
-
-    # 커리큘럼
+    # 📅 세로형 타임라인식 카드 커리큘럼 가이드 (가로 폭을 절대 침범하지 않음)
     st.subheader("📅 AIVLE 커리큘럼")
-    st.caption("1단계: AI 분석 & 파이썬 기초\n\n2단계: 머신러닝 & 딥러닝 실전\n\n3단계: DX 컨설팅 & 빅프로젝트")
+    st.markdown("""
+    <div class="timeline-card">
+        <div class="timeline-title">Step 1. AI 분석 & 파이썬 기초</div>
+        <div class="timeline-desc">데이터 분석을 위한 파이썬 라이브러리와 통계의 기초를 학습합니다.</div>
+    </div>
+    <div class="timeline-card">
+        <div class="timeline-title">Step 2. 머신러닝 & 딥러닝 실전</div>
+        <div class="timeline-desc">다양한 알고리즘 설계와 딥러닝 실전 모델 구현 역량을 체득합니다.</div>
+    </div>
+    <div class="timeline-card">
+        <div class="timeline-title">Step 3. DX 컨설팅 & 빅프로젝트</div>
+        <div class="timeline-desc">실제 산업 도메인의 문제를 비즈니스 관점에서 정의하고 해결합니다.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# --- 5. 메인화면: GPT 스타일의 채팅창만 단독 배치 ---
+# --- 5. 메인화면: GPT 스타일의 채팅창 단독 배치 ---
 st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>💬 AIVLE School 학습 도우미</h3>", unsafe_allow_html=True)
-# 사용자 피드백 요청에 따라 서브 배너 설명 문구는 제거되었습니다.
 
 # 추천 질문 목록 (대화 시작을 유도하는 미니 버튼 리스트)
 recommends = [
@@ -216,7 +238,15 @@ for message in st.session_state.messages:
     with st.chat_message(role):
         st.markdown(message.content)
 
-# 사용자 입력 감지 및 처리 우선순위 지정
+# --- 7. 스마트 통합 입력 영역 (채팅창 바로 위 📎 클립 업로더 배치) ---
+upload_col, spacer = st.columns([4, 6])
+with upload_col:
+    uploaded_file = st.file_uploader("📎 PDF 백서 업로드", type=["pdf"], label_visibility="collapsed")
+    if uploaded_file is not None:
+        # 파일 업로드 즉시 동기화
+        process_uploaded_file(uploaded_file)
+
+# 사용자 입력 감지
 user_input = st.chat_input("질문할 내용을 입력해 주세요.")
 
 if st.session_state.user_query:
