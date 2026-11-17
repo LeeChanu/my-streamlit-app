@@ -90,7 +90,7 @@ def process_uploaded_file(uploaded_file):
 @st.cache_resource
 def get_chain():
     vectorstore = get_retriever()
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 3.0})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # 3.0을 정수 3으로 수정하여 ValueError 해결
 
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
