@@ -12,45 +12,49 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from operator import itemgetter
 
 # 페이지 설정
-st.set_page_config(page_title="AIVLE School 학습 멘토 도우미", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="AIVLE GPT", page_icon="💬", layout="wide")
 
 # 폴더 설정 및 상수 정의
 CHROMA_DIR = "chroma_db"
 COLLECTION = "aivle_docs"
 
-# CSS 스타일링으로 UI 개선
+# GPT 느낌의 모던하고 심플한 CSS 스타일링 + 떠다니는 포춘쿠키 애니메이션
 st.markdown("""
 <style>
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #1E3A8A;
-        text-align: center;
-        margin-bottom: 5px;
+    /* 대화창 상단 여백 제거 및 너비 제한 */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 850px;
     }
-    .sub-title {
-        font-size: 1.1rem;
-        color: #4B5563;
-        text-align: center;
-        margin-bottom: 25px;
-    }
-    .recommend-box {
-        border: 1px solid #E5E7EB;
-        border-radius: 10px;
-        padding: 12px;
-        background-color: #F9FAFB;
-        margin-bottom: 10px;
-    }
-    .stButton>button {
-        border-radius: 8px;
-    }
+    /* 포춘쿠키 박스 스타일 */
     .egg-box {
         text-align: center;
-        padding: 10px;
-        background-color: #FEF3C7;
-        border-radius: 12px;
-        border: 1px dashed #F59E0B;
-        margin: 10px 0;
+        padding: 12px;
+        background-color: #F3F4F6;
+        border-radius: 8px;
+        border: 1px solid #E5E7EB;
+        font-size: 0.9rem;
+        color: #374151;
+        margin-top: 10px;
+    }
+    /* 둥둥 떠다니는 애니메이션 정의 */
+    @keyframes floatCookie {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(5deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+    .floating-cookie {
+        font-size: 3.5rem;
+        text-align: center;
+        display: block;
+        cursor: pointer;
+        animation: floatCookie 3s ease-in-out infinite;
+        user-select: none;
+        margin: 15px 0;
+    }
+    .floating-cookie:hover {
+        filter: drop-shadow(0px 8px 12px rgba(245, 158, 11, 0.4));
     }
 </style>
 """, unsafe_allow_html=True)
@@ -80,7 +84,7 @@ def process_uploaded_file(uploaded_file):
     vectorstore = get_retriever()
     vectorstore.add_documents(chunks)
     os.remove("temp_uploaded.pdf")
-    st.success(f"📄 {uploaded_file.name} 문서가 성공적으로 학습 데이터에 추가되었습니다!")
+    st.success(f"📄 {uploaded_file.name}가 성공적으로 동기화되었습니다!")
 
 # --- 2. RAG 파이프라인 구성 ---
 @st.cache_resource
@@ -91,11 +95,10 @@ def get_chain():
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-    # 시스템 메시지 고도화 (에이블스쿨의 열정과 도전을 이끌어내는 인격 부여)
     s_msg = (
-        "당신은 KT AIVLE School의 열정적이고 전문적인 학습 멘토입니다.\n"
-        "주어진 [문서] 내용을 바탕으로 성실하고 명확하게 답변해 주세요.\n"
-        "답변 끝에는 에이블러(AIVLEer)가 성장을 위해 적극적으로 도전하고 한걸음 나아갈 수 있도록 격려와 자신감을 북돋아 주는 따뜻한 멘토링 메시지를 항상 한두 줄 덧붙여 주세요.\n\n"
+        "당신은 KT AIVLE School의 전문적이고 다정한 인공지능 학습 멘토입니다.\n"
+        "주어진 [문서]를 바탕으로 군더더기 없이 핵심 중심의 친절하고 명확한 답변을 제시해 주세요.\n"
+        "답변의 마지막 줄에는 항상 에이블러(AIVLEer)의 성장을 열정적으로 응원하는 격려와 긍정의 멘토링 코멘트를 잊지 말고 작성해 주세요.\n\n"
         "[문서]\n{context}"
     )
     h_msg = "{input}"
@@ -122,81 +125,75 @@ if "messages" not in st.session_state:
 if "user_query" not in st.session_state:
     st.session_state.user_query = ""
 
-# --- 4. 레이아웃 & 사이드바 구성 ---
-# 로고 출력 (시작 화면 상단)
-st.markdown("<center><img src='https://raw.githubusercontent.com/Jangrae/img/master/rag_title.png' width='450'/></center>", unsafe_allow_html=True)
-st.markdown("<div class='main-title'>AIVLE School AI 학습 멘토 도우미</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-title'>🚀 에이블러의 지식 충전소! 궁금한 모든 것을 질문하고 성장해 보세요!</div>", unsafe_allow_html=True)
-
-# 사이드바 영역
+# --- 4. 사이드바 구성 (기타 기능은 모두 사이드바 내부로 숨김) ---
 with st.sidebar:
     st.image("https://raw.githubusercontent.com/Jangrae/img/master/rag_title.png", use_container_width=True)
-    st.title("🛠️ 에이블 서포트 센터")
+    st.title("AIVLE GPT")
     
-    # 대화 기록 관리 및 대화 삭제 기능
+    # 🥠 사이드바 포춘쿠키 이스터에그 배치
+    st.subheader("🥠 오늘의 성장 행운")
+    st.markdown("<span class='floating-cookie'>🥠</span>", unsafe_allow_html=True)
+    
+    if st.button("둥둥 떠다니는 포춘쿠키 잡아라!", use_container_width=True):
+        fortunes = [
+            "실패는 다음 단계로 나아가기 위한 정교한 튜닝 과정일 뿐입니다! 힘내세요!",
+            "지금 풀리지 않는 버그는 내일의 가장 든든한 기술 자산이 됩니다!",
+            "에이블스쿨의 협업 경험은 훗날 현업에서 가장 빛나는 무기가 됩니다.",
+            "치열한 하루하루의 몰입이 쌓여 가장 완성도 높은 내일을 만들어냅니다.",
+            "어려운 과제가 찾아왔다면 한 걸음 더 크게 도약할 때가 된 것입니다!"
+        ]
+        st.markdown(f"<div class='egg-box'>✨ <b>조언:</b> {random.choice(fortunes)}</div>", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # 대화 삭제
     st.subheader("💬 대화 관리")
-    if st.button("🗑️ 이전 대화 내용 초기화", use_container_width=True):
+    if st.button("이전 대화 내용 초기화", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
         
     st.markdown("---")
     
-    # 파일 업로드 기능 추가 (PDF 학습)
-    st.subheader("📂 나만의 학습 백서 추가")
-    uploaded_file = st.file_uploader("PDF 파일을 추가하여 질문 대상 범위를 넓혀보세요.", type=["pdf"])
+    # 파일 업로드
+    st.subheader("📂 나만의 문서 추가")
+    uploaded_file = st.file_uploader("추가할 PDF 백서를 업로드하세요.", type=["pdf"])
     if uploaded_file is not None:
-        if st.button("💡 문서 학습 시키기", use_container_width=True):
+        if st.button("학습 데이터에 동기화", use_container_width=True):
             process_uploaded_file(uploaded_file)
             
     st.markdown("---")
     
-    # 교육 커리큘럼 로드맵 가이드 제공
-    st.subheader("📅 AIVLE 핵심 커리큘럼")
-    st.info("1. AI 분석 & 파이썬 기초\n2. 머신러닝 & 딥러닝 핵심 실습\n3. DX 컨설팅 & 빅프로젝트 실전과정")
+    # 커리큘럼
+    st.subheader("📅 AIVLE 커리큘럼")
+    st.caption("1단계: AI 분석 & 파이썬 기초\n\n2단계: 머신러닝 & 딥러닝 실전\n\n3단계: DX 컨설팅 & 빅프로젝트")
 
-# --- 5. 이스터 에그 (포춘쿠키 기능) ---
-st.markdown("### 🥠 오늘 나의 성장 한마디")
-col_egg1, col_egg2 = st.columns([1, 4])
-with col_egg1:
-    click_cookie = st.button("🥠 포춘쿠키 열기")
-with col_egg2:
-    if click_cookie:
-        fortunes = [
-            "실패는 다음 단계로 나아가기 위한 정교한 튜닝 과정일 뿐입니다! 힘내세요!",
-            "지금 풀리지 않는 버그는 내일의 가장 든든한 기술 자산이 됩니다. 포기하지 마세요!",
-            "에이블스쿨의 협업 경험은 훗날 현업에서 가장 빛나는 협업 마인드가 됩니다!",
-            "1만 시간의 법칙보다 값진 것은, 6개월간 매일 동료들과 치열하게 치달리는 몰입의 경험입니다.",
-            "어려운 과제가 찾아왔다면, 당신이 그만큼 크게 도약할 준비가 되었다는 우주의 시그널입니다!"
-        ]
-        st.markdown(f"<div class='egg-box'>✨ **행운의 조언** : {random.choice(fortunes)}</div>", unsafe_allow_html=True)
+# --- 5. 메인화면: GPT 스타일의 채팅창만 단독 배치 ---
+st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>💬 AIVLE GPT</h3>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #6B7280; font-size: 0.95rem; margin-bottom: 30px;'>무엇이든 질문해 보세요. 학습 백서 기반으로 신속하게 답변해 드립니다.</p>", unsafe_allow_html=True)
 
-st.markdown("---")
-
-# --- 6. 추천 질문 목록 ---
-st.markdown("#### 💡 자주 묻는 질문 (클릭 시 자동 입력)")
+# 추천 질문 목록 (대화 시작을 유도하는 미니 버튼 리스트)
 recommends = [
-    "AIVLE School의 전반적인 공부 방법과 꿀팁을 가르쳐줘!",
-    "선배들이 추천하는 자기계발 방법은 무엇이 있나요?",
-    "프로젝트 협업을 잘 조율하고 이끄는 방법이 궁금해.",
-    "비전공자인데 진도를 잘 따라가려면 어떻게 해야 할까요?"
+    "AIVLE School 공부 방법 추천해줘!",
+    "선배들의 자기계발 꿀팁은 무엇인가요?",
+    "효과적인 프로젝트 협업 노하우는?",
+    "비전공자를 위한 학습 전략은?"
 ]
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.button(f"📌 {recommends[0]}", use_container_width=True):
+    if st.button(f"💡 {recommends[0]}", use_container_width=True):
         st.session_state.user_query = recommends[0]
-    if st.button(f"📌 {recommends[1]}", use_container_width=True):
+    if st.button(f"💡 {recommends[1]}", use_container_width=True):
         st.session_state.user_query = recommends[1]
 with col2:
-    if st.button(f"📌 {recommends[2]}", use_container_width=True):
+    if st.button(f"💡 {recommends[2]}", use_container_width=True):
         st.session_state.user_query = recommends[2]
-    if st.button(f"📌 {recommends[3]}", use_container_width=True):
+    if st.button(f"💡 {recommends[3]}", use_container_width=True):
         st.session_state.user_query = recommends[3]
 
 st.markdown("---")
 
-# --- 7. 대화 인터페이스 렌더링 ---
-# 세션 기반 이전 메시지 렌더링
+# --- 6. 대화 인터페이스 렌더링 ---
 for message in st.session_state.messages:
     role = "user" if isinstance(message, HumanMessage) else "assistant"
     with st.chat_message(role):
@@ -206,7 +203,7 @@ for message in st.session_state.messages:
 user_input = st.chat_input("질문할 내용을 입력해 주세요.")
 if st.session_state.user_query:
     user_input = st.session_state.user_query
-    st.session_state.user_query = "" # 사용 후 초기화
+    st.session_state.user_query = ""
 
 if user_input:
     with st.chat_message("user"):
