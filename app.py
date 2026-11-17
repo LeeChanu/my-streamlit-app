@@ -103,11 +103,19 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     [data-testid="stChatInput"]:focus-within {
-        border-color: #14B8A6;
-        box-shadow: 0 0 0 2px rgba(20,184,166,0.12);
+        border-color: #2563EB !important;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.15) !important;
     }
     [data-testid="stChatInputTextArea"] {
         padding-block: 12px;
+    }
+    [data-testid="stChatInput"]:focus-within > div {
+        border-color: #2563EB !important;
+        outline-color: #2563EB !important;
+    }
+    [data-testid="stChatInput"] textarea:focus {
+        outline: none !important;
+        box-shadow: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
