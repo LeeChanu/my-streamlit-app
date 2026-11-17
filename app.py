@@ -2,6 +2,9 @@
 import streamlit as st
 import os
 import random
+import shutil
+import tempfile
+from pathlib import Path
 from uuid import uuid4
 from copy import deepcopy
 from PIL import Image
@@ -90,36 +93,48 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 1. 벡터 스토어 & 리트리버 설정 ---
+def get_session_db_dir():
+    if "writable_chroma_dir" not in st.session_state:
+        runtime_dir = Path(tempfile.mkdtemp(prefix="aivle_chroma_")) / "chroma_db"
+        source_dir = Path(CHROMA_DIR)
+        if source_dir.is_dir():
+            shutil.copytree(source_dir, runtime_dir, copy_function=shutil.copyfile)
+        else:
+            runtime_dir.mkdir(parents=True)
+        st.session_state.writable_chroma_dir = str(runtime_dir)
+    return st.session_state.writable_chroma_dir
+
 @st.cache_resource
-def get_retriever():
+def get_retriever(db_dir):
     embedding = OpenAIEmbeddings(model="text-embedding-3-small")
     vectorstore = Chroma(
         collection_name=COLLECTION,
         embedding_function=embedding,
-        persist_directory=CHROMA_DIR
+        persist_directory=db_dir
     )
     return vectorstore
 
-# 임시 업로드 파일 처리용
+# 업로드 파일과 DB를 접속 세션별 쓰기 가능한 임시 경로에서 처리
 def process_uploaded_file(uploaded_file):
-    with open("temp_uploaded.pdf", "wb") as f:
-        f.write(uploaded_file.getbuffer())
-
-    loader = PyMuPDF4LLMLoader("temp_uploaded.pdf")
-    docs = loader.load()
-
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-    chunks = splitter.split_documents(docs)
-
-    vectorstore = get_retriever()
-    vectorstore.add_documents(chunks)
-    os.remove("temp_uploaded.pdf")
-    st.success(f"📄 {uploaded_file.name}가 성공적으로 동기화되었습니다!")
+    with tempfile.TemporaryDirectory(prefix="aivle_pdf_") as upload_dir:
+        pdf_path = Path(upload_dir) / "uploaded.pdf"
+        pdf_path.write_bytes(uploaded_file.getbuffer())
+        loader = PyMuPDF4LLMLoader(str(pdf_path))
+        docs = loader.load()
+        for doc in docs:
+            doc.metadata["source"] = uploaded_file.name
+        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+        chunks = splitter.split_documents(docs)
+        if not chunks:
+            raise ValueError("PDF에서 텍스트를 추출하지 못했습니다. 스캔 문서는 OCR 처리가 필요합니다.")
+        vectorstore = get_retriever(get_session_db_dir())
+        vectorstore.add_documents(chunks)
+    st.success(f"📄 {uploaded_file.name} 반영 완료! 이 문서에 대해 질문해 주세요.")
 
 # --- 2. RAG 파이프라인 구성 ---
 @st.cache_resource
-def get_chain():
-    vectorstore = get_retriever()
+def get_chain(db_dir):
+    vectorstore = get_retriever(db_dir)
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
     def format_docs(docs):
@@ -149,7 +164,7 @@ def get_chain():
 
 # 체인 초기화 안전하게 감싸기
 try:
-    chain = get_chain()
+    chain = get_chain(get_session_db_dir())
 except Exception as e:
     st.error(f"체인 로딩 에러: {str(e)}")
     chain = None
