@@ -201,7 +201,7 @@ with st.sidebar:
             "치열한 하루하루의 몰입이 쌓여 가장 완성도 높은 내일을 만들어냅니다.",
             "어려운 과제가 찾아왔다면 한 걸음 더 크게 도약할 때가 된 것입니다!"
         ]
-        st.toast(random.choice(fortunes), icon="🥠")
+        st.markdown(f"<div class='egg-box'>✨ {random.choice(fortunes)}</div>", unsafe_allow_html=True)
 
     st.markdown("---")
 
