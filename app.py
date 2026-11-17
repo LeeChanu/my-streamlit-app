@@ -76,6 +76,8 @@ st.markdown("""
     }
 
     /* 첨부 아이콘은 st.chat_input의 기본 업로드 버튼을 사용합니다. */
+    [data-testid="stChatInput"] button[aria-label="Upload a file"] svg { display: none; }
+    [data-testid="stChatInput"] button[aria-label="Upload a file"]::after { content: "📎"; font-size: 20px; line-height: 1; }
 </style>
 """, unsafe_allow_html=True)
 
