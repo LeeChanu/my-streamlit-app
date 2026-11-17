@@ -76,6 +76,31 @@ st.markdown("""
         color: #4B5563;
         line-height: 1.3;
     }
+
+    /* 파일 업로더를 메인 입력창과 완전히 붙어있는 초소형 클립 형태로 스타일 제어 */
+    div[data-testid="stFileUploader"] {
+        margin-top: -10px;
+        margin-bottom: -15px;
+        padding: 0;
+    }
+    div[data-testid="stFileUploader"] section {
+        padding: 6px 14px !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 20px !important;
+        background-color: #F9FAFB !important;
+        min-height: auto !important;
+    }
+    div[data-testid="stFileUploader"] section > div {
+        padding: 0 !important;
+    }
+    /* 파일 업로더 내 쓸데없는 텍스트(Drag & drop 등) 가리기 */
+    div[data-testid="stFileUploader"] section button {
+        font-size: 0.8rem !important;
+        padding: 2px 10px !important;
+    }
+    div[data-testid="stFileUploader"] section div[data-testid="stMarkdownContainer"] p {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -214,7 +239,7 @@ st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>💬 AIVLE School �
 recommends = [
     "AIVLE School 공부 방법 추천해줘!",
     "선배들의 자기계발 꿀팁은 무엇인가요?",
-    "효과적인 프로젝트 협업 노하우는?",
+    "효과적인 프로젝트 협업 노하노는?",
     "비전공자를 위한 학습 전략은?"
 ]
 
@@ -238,13 +263,11 @@ for message in st.session_state.messages:
     with st.chat_message(role):
         st.markdown(message.content)
 
-# --- 7. 스마트 통합 입력 영역 (채팅창 바로 위 📎 클립 업로더 배치) ---
-upload_col, spacer = st.columns([4, 6])
-with upload_col:
-    uploaded_file = st.file_uploader("📎 PDF 백서 업로드", type=["pdf"], label_visibility="collapsed")
-    if uploaded_file is not None:
-        # 파일 업로드 즉시 동기화
-        process_uploaded_file(uploaded_file)
+# --- 7. 메인 채팅 입력창 구역 ---
+# 채팅 입력창 바로 위에 📎 마크가 들어간 세련된 파일 업로더 배치
+uploaded_file = st.file_uploader("📎 PDF 백서 첨부하기", type=["pdf"], label_visibility="visible")
+if uploaded_file is not None:
+    process_uploaded_file(uploaded_file)
 
 # 사용자 입력 감지
 user_input = st.chat_input("질문할 내용을 입력해 주세요.")
