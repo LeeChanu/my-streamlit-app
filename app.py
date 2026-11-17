@@ -19,15 +19,16 @@ st.set_page_config(page_title="AIVLE School 학습 도우미", page_icon="💬",
 CHROMA_DIR = "chroma_db"
 COLLECTION = "aivle_docs"
 
-# GPT 느낌의 모던하고 심플한 CSS 스타일링 + 떠다니는 포춘쿠키 애니메이션 + 세로 타임라인 카드
+# 입력창 내부 왼쪽 일체형 클립 UI를 구현하는 CSS
 st.markdown("""
 <style>
-    /* 대화창 상단 여백 제거 및 너비 제한 */
+    /* 대화창 영역 최적화 */
     .block-container {
         padding-top: 1.5rem;
-        padding-bottom: 2rem;
+        padding-bottom: 6rem;
         max-width: 850px;
     }
+    
     /* 포춘쿠키 박스 스타일 */
     .egg-box {
         text-align: center;
@@ -39,7 +40,6 @@ st.markdown("""
         color: #374151;
         margin-top: 10px;
     }
-    /* 둥둥 떠다니는 애니메이션 정의 */
     @keyframes floatCookie {
         0% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-15px) rotate(5deg); }
@@ -54,9 +54,7 @@ st.markdown("""
         user-select: none;
         margin: 15px 0;
     }
-    .floating-cookie:hover {
-        filter: drop-shadow(0px 8px 12px rgba(245, 158, 11, 0.4));
-    }
+    
     /* 세로형 커리큘럼 타임라인 블록 */
     .timeline-card {
         background-color: #F9FAFB;
@@ -77,29 +75,65 @@ st.markdown("""
         line-height: 1.3;
     }
 
-    /* 파일 업로더를 메인 입력창과 완전히 붙어있는 초소형 클립 형태로 스타일 제어 */
-    div[data-testid="stFileUploader"] {
-        margin-top: -10px;
-        margin-bottom: -15px;
-        padding: 0;
+    /* 입력바 컨테이너 포지셔닝 조정 */
+    div[data-testid="stChatInput"] {
+        position: relative !important;
     }
-    div[data-testid="stFileUploader"] section {
-        padding: 6px 14px !important;
-        border: 1px solid #E5E7EB !important;
-        border-radius: 20px !important;
-        background-color: #F9FAFB !important;
-        min-height: auto !important;
+
+    /* 질문 입력창 텍스트박스 자체를 지목하여 왼쪽에 클립이 들어갈 넉넉한 영역 확보 */
+    div[data-testid="stChatInput"] textarea {
+        padding-left: 55px !important;
     }
-    div[data-testid="stFileUploader"] section > div {
+
+    /* 실제 파일 업로더 컨테이너를 입력창 박스 내부 좌측 정중앙에 완벽하게 일체화 */
+    .clip-uploader-container {
+        position: absolute !important;
+        left: 10px !important;
+        bottom: 8px !important;
+        z-index: 99999 !important;
+        width: 36px !important;
+        height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .clip-uploader-container div[data-testid="stFileUploader"] {
+        width: 100% !important;
+        height: 100% !important;
         padding: 0 !important;
+        margin: 0 !important;
     }
-    /* 파일 업로더 내 쓸데없는 텍스트(Drag & drop 등) 가리기 */
-    div[data-testid="stFileUploader"] section button {
-        font-size: 0.8rem !important;
-        padding: 2px 10px !important;
+
+    .clip-uploader-container div[data-testid="stFileUploader"] section {
+        padding: 0 !important;
+        min-height: auto !important;
+        background-color: transparent !important;
+        border: none !important;
     }
-    div[data-testid="stFileUploader"] section div[data-testid="stMarkdownContainer"] p {
+
+    /* 불필요한 기본 드롭박스 텍스트 가리기 */
+    .clip-uploader-container div[data-testid="stFileUploader"] section div {
         display: none !important;
+    }
+    
+    /* 업로드 브라우즈 버튼을 입력창 바 내부에 어울리는 둥근 회색 📎 모양으로 완전 리셋 */
+    .clip-uploader-container div[data-testid="stFileUploader"] button {
+        background-color: transparent !important;
+        border: none !important;
+        width: 36px !important;
+        height: 36px !important;
+        color: #6B7280 !important;
+        font-size: 1.4rem !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
+        transition: color 0.2s;
+    }
+    
+    .clip-uploader-container div[data-testid="stFileUploader"] button:hover {
+        color: #1E3A8A !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -172,7 +206,7 @@ except Exception as e:
 # --- 3. 세션 상태 초기화 ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "user_query" not in st.session_state:
+if "user_query" not in st.session_state: 
     st.session_state.user_query = ""
 
 # --- 4. 사이드바 구성 ---
@@ -235,11 +269,11 @@ with st.sidebar:
 # --- 5. 메인화면: GPT 스타일의 채팅창 단독 배치 ---
 st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>💬 AIVLE School 학습 도우미</h3>", unsafe_allow_html=True)
 
-# 추천 질문 목록 (대화 시작을 유도하는 미니 버튼 리스트)
+# 추천 질문 목록
 recommends = [
     "AIVLE School 공부 방법 추천해줘!",
     "선배들의 자기계발 꿀팁은 무엇인가요?",
-    "효과적인 프로젝트 협업 노하노는?",
+    "효과적인 프로젝트 협업 노하우는?",
     "비전공자를 위한 학습 전략은?"
 ]
 
@@ -263,9 +297,12 @@ for message in st.session_state.messages:
     with st.chat_message(role):
         st.markdown(message.content)
 
-# --- 7. 메인 채팅 입력창 구역 ---
-# 채팅 입력창 바로 위에 📎 마크가 들어간 세련된 파일 업로더 배치
-uploaded_file = st.file_uploader("📎 PDF 백서 첨부하기", type=["pdf"], label_visibility="visible")
+# --- 7. 메인 채팅 입력창 구역 및 📎 일체형 클립 컨테이너 배치 ---
+# 절대 위치 레이아웃으로 st.chat_input 안으로 완벽히 병합
+st.markdown('<div class="clip-uploader-container">', unsafe_allow_html=True)
+uploaded_file = st.file_uploader("📎", type=["pdf"], label_visibility="collapsed")
+st.markdown('</div>', unsafe_allow_html=True)
+
 if uploaded_file is not None:
     process_uploaded_file(uploaded_file)
 
