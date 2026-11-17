@@ -2,6 +2,8 @@
 import streamlit as st
 import os
 import random
+from uuid import uuid4
+from copy import deepcopy
 from PIL import Image
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
@@ -78,6 +80,12 @@ st.markdown("""
     /* 첨부 아이콘은 st.chat_input의 기본 업로드 버튼을 사용합니다. */
     [data-testid="stChatInput"] button[aria-label="Upload a file"] svg { display: none; }
     [data-testid="stChatInput"] button[aria-label="Upload a file"]::after { content: "📎"; font-size: 20px; line-height: 1; }
+
+    .block-container { padding-top: 4rem; }
+    .welcome-title { text-align: center; color: #1E3A8A; margin: 8vh auto 2rem; font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.5; overflow-wrap: anywhere; }
+    .st-key-fortune_cookie button { border: 0; background: transparent; box-shadow: none; padding: 18px; min-height: 100px; animation: floatCookie 3s ease-in-out infinite; }
+    .st-key-fortune_cookie button p { font-size: 3.5rem; line-height: 1.5; }
+    .st-key-fortune_cookie button:hover { background: transparent; border: 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -152,6 +160,21 @@ if "messages" not in st.session_state:
 if "user_query" not in st.session_state: 
     st.session_state.user_query = ""
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+if "active_chat_id" not in st.session_state:
+    st.session_state.active_chat_id = None
+
+def save_current_chat():
+    if not st.session_state.messages:
+        return
+    if st.session_state.active_chat_id is None:
+        st.session_state.active_chat_id = uuid4().hex
+    title = next((m.content for m in st.session_state.messages if isinstance(m, HumanMessage)), "새 대화")
+    entry = {"id": st.session_state.active_chat_id, "title": title[:32], "messages": deepcopy(st.session_state.messages)}
+    others = [c for c in st.session_state.chat_history if c["id"] != entry["id"]]
+    st.session_state.chat_history = [entry, *others][:3]
+
 # --- 4. 사이드바 구성 ---
 with st.sidebar:
     # 투명 배경 로고 적용
@@ -169,9 +192,8 @@ with st.sidebar:
 
     # 🥠 사이드바 포춘쿠키 이스터에그 배치
     st.subheader("🥠 오늘의 성장 행운")
-    st.markdown("<span class='floating-cookie'>🥠</span>", unsafe_allow_html=True)
 
-    if st.button("둥둥 떠다니는 포춘쿠키 잡아라!", use_container_width=True):
+    if st.button("🥠", key="fortune_cookie", help="쿠키를 눌러 오늘의 한마디 보기", use_container_width=True):
         fortunes = [
             "실패는 다음 단계로 나아가기 위한 정교한 튜닝 과정일 뿐입니다! 힘내세요!",
             "지금 풀리지 않는 버그는 내일의 가장 든든한 기술 자산이 됩니다!",
@@ -179,17 +201,27 @@ with st.sidebar:
             "치열한 하루하루의 몰입이 쌓여 가장 완성도 높은 내일을 만들어냅니다.",
             "어려운 과제가 찾아왔다면 한 걸음 더 크게 도약할 때가 된 것입니다!"
         ]
-        st.markdown(f"<div class='egg-box'>✨ <b>조언:</b> {random.choice(fortunes)}</div>", unsafe_allow_html=True)
+        st.toast(random.choice(fortunes), icon="🥠")
 
     st.markdown("---")
 
-    # 대화 삭제
-    st.subheader("💬 대화 관리")
-    if st.button("이전 대화 내용 초기화", use_container_width=True):
+    st.subheader("💬 최근 대화")
+    if st.button("＋ 새 대화", use_container_width=True):
+        save_current_chat()
         st.session_state.messages = []
         st.session_state.user_query = ""
+        st.session_state.active_chat_id = None
         st.rerun()
-
+    if not st.session_state.chat_history:
+        st.caption("대화를 시작하면 최근 3개가 여기에 저장돼요.")
+    for chat in st.session_state.chat_history:
+        label = ("💬 " if chat["id"] == st.session_state.active_chat_id else "🕘 ") + chat["title"]
+        if st.button(label, key="restore_" + chat["id"], use_container_width=True, help="이 대화 이어보기"):
+            save_current_chat()
+            st.session_state.messages = deepcopy(chat["messages"])
+            st.session_state.active_chat_id = chat["id"]
+            st.session_state.user_query = ""
+            st.rerun()
     st.markdown("---")
 
     # 📅 세로형 타임라인식 카드 커리큘럼 가이드 (가로 폭을 절대 침범하지 않음)
@@ -210,29 +242,31 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # --- 5. 메인화면: GPT 스타일의 채팅창 단독 배치 ---
-st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>💬 AIVLE School 학습 도우미</h3>", unsafe_allow_html=True)
-
-# 추천 질문 목록
-recommends = [
-    "AIVLE School 공부 방법 추천해줘!",
-    "선배들의 자기계발 꿀팁은 무엇인가요?",
-    "효과적인 프로젝트 협업 노하우는?",
-    "비전공자를 위한 학습 전략은?"
-]
-
-col1, col2 = st.columns(2)
-with col1:
-    if st.button(f"💡 {recommends[0]}", use_container_width=True):
-        st.session_state.user_query = recommends[0]
-    if st.button(f"💡 {recommends[1]}", use_container_width=True):
-        st.session_state.user_query = recommends[1]
-with col2:
-    if st.button(f"💡 {recommends[2]}", use_container_width=True):
-        st.session_state.user_query = recommends[2]
-    if st.button(f"💡 {recommends[3]}", use_container_width=True):
-        st.session_state.user_query = recommends[3]
-
-st.markdown("---")
+welcome = st.empty()
+if not st.session_state.messages:
+    with welcome.container():
+        st.markdown('<h1 class="welcome-title">💬 AIVLE School 학습 도우미</h1>', unsafe_allow_html=True)
+        # 추천 질문 목록
+        recommends = [
+            "AIVLE School 공부 방법 추천해줘!",
+            "선배들의 자기계발 꿀팁은 무엇인가요?",
+            "효과적인 프로젝트 협업 노하우는?",
+            "비전공자를 위한 학습 전략은?"
+        ]
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button(f"💡 {recommends[0]}", use_container_width=True):
+                st.session_state.user_query = recommends[0]
+            if st.button(f"💡 {recommends[1]}", use_container_width=True):
+                st.session_state.user_query = recommends[1]
+        with col2:
+            if st.button(f"💡 {recommends[2]}", use_container_width=True):
+                st.session_state.user_query = recommends[2]
+            if st.button(f"💡 {recommends[3]}", use_container_width=True):
+                st.session_state.user_query = recommends[3]
+        
+        st.markdown("---")
 
 # --- 6. 대화 인터페이스 렌더링 ---
 for message in st.session_state.messages:
@@ -263,6 +297,7 @@ if st.session_state.user_query:
     st.session_state.user_query = ""
 
 if user_input and chain is not None:
+    welcome.empty()
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append(HumanMessage(content=user_input))
@@ -273,4 +308,5 @@ if user_input and chain is not None:
         full_response = st.write_stream(response_stream)
 
     st.session_state.messages.append(AIMessage(content=full_response))
+    save_current_chat()
     st.rerun()
