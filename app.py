@@ -89,6 +89,26 @@ st.markdown("""
     .st-key-fortune_cookie button { border: 0; background: transparent; box-shadow: none; padding: 18px; min-height: 100px; animation: floatCookie 3s ease-in-out infinite; }
     .st-key-fortune_cookie button p { font-size: 3.5rem; line-height: 1.5; }
     .st-key-fortune_cookie button:hover { background: transparent; border: 0; }
+
+    /* 하단 입력칸을 대화 본문 폭에 맞춰 가운데 정렬 */
+    [data-testid="stBottomBlockContainer"] {
+        max-width: 850px;
+        margin-inline: auto;
+        padding-inline: 1rem;
+        box-sizing: border-box;
+    }
+    [data-testid="stChatInput"] {
+        border: 1px solid #D1D5DB;
+        border-radius: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    [data-testid="stChatInput"]:focus-within {
+        border-color: #14B8A6;
+        box-shadow: 0 0 0 2px rgba(20,184,166,0.12);
+    }
+    [data-testid="stChatInputTextArea"] {
+        padding-block: 12px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
