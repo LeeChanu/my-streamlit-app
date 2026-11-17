@@ -2,6 +2,7 @@
 import streamlit as st
 import os
 import random
+from PIL import Image
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
@@ -90,7 +91,7 @@ def process_uploaded_file(uploaded_file):
 @st.cache_resource
 def get_chain():
     vectorstore = get_retriever()
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # 3.0을 정수 3으로 수정하여 ValueError 해결
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
@@ -132,7 +133,17 @@ if "user_query" not in st.session_state:
 
 # --- 4. 사이드바 구성 (기타 기능은 모두 사이드바 내부로 숨김) ---
 with st.sidebar:
-    st.image("https://raw.githubusercontent.com/Jangrae/img/master/rag_title.png", use_container_width=True)
+    # 기존 웹 주소 대신 업로드해주신 투명 배경 AIVLE 로고 파일 불러오기
+    logo_path = "투명 배경 AIVLE 로고 복원.png"
+    if os.path.exists(logo_path):
+        try:
+            logo_img = Image.open(logo_path)
+            st.image(logo_img, use_container_width=True)
+        except Exception as e:
+            st.warning("로고 이미지를 불러오지 못했습니다.")
+    else:
+        st.image("https://raw.githubusercontent.com/Jangrae/img/master/rag_title.png", use_container_width=True)
+    
     st.title("AIVLE School")
 
     # 🥠 사이드바 포춘쿠키 이스터에그 배치
@@ -175,7 +186,7 @@ with st.sidebar:
 
 # --- 5. 메인화면: GPT 스타일의 채팅창만 단독 배치 ---
 st.markdown("<h3 style='text-align: center; color: #1E3A8A;'>💬 AIVLE School 학습 도우미</h3>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #6B7280; font-size: 0.95rem; margin-bottom: 30px;'>무엇이든 질문해 보세요. 학습 백서 기반으로 신속하게 답변해 드립니다.</p>", unsafe_allow_html=True)
+# 사용자 피드백 요청에 따라 서브 배너 설명 문구는 제거되었습니다.
 
 # 추천 질문 목록 (대화 시작을 유도하는 미니 버튼 리스트)
 recommends = [
